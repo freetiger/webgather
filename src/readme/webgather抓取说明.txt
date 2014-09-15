@@ -1,0 +1,228 @@
+webgather抓取规则以列表的形式保存
+抓取引擎按顺序执行规则列表中的规则
+如：
+jobpath = []
+
+jobpath.append({
+    	"url":['http://search.china.alibaba.com/search/company_search.htm?province=广东省&city=佛山',],
+        "regexps":[{		
+		"str":"nsurl",
+		"exp":['<a  onmousedown="[^"]*"  href="([^"]*)" [^>]*>下一页</a>',],
+                "unique":"1",
+		}, ],
+       "getblocks":{"start_str":'<div class="content">\n<div class="info">',"end_str":'<div class="content">\n<div class="info">',"cnt_str":"comblock"},
+       "encoding":"GBK",
+       "needLoop":"1",
+       "loopUrl":["${nsurl1}",],
+       "job_description":"阿里巴巴-佛山"
+	})
+
+
+jobpath.append({
+    	"url":['inline:///${comblock}',],
+	"regexps":[{		
+		"str":"qsurl",
+		"exp":['<span class="m undline"><a href="(http\://([^"]*).cn\.alibaba\.com/)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://china\.alibaba\.com/company/detail/([^"]*).html)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://company\.china\.alibaba\.com/athena/([^"]*).html)"[^>]*>([^<]*)<'],
+                "unique":"0",
+                "omittag":['font','/font']
+		},
+                {		
+		"str":"lxurl",
+		"exp":['<a href="([^"]*)" [^>]*>联系方式</a>',],
+                "unique":"1",          
+		},                
+		],
+       "encoding":"UTF-8",
+       "needLoop":"0",
+       "loopUrl":[],
+       "job_description":"阿里巴巴-佛山"
+	})
+
+jobpath.append({
+    	"url":['${lxurl1}',],
+	"regexps":[{		
+		"str":"lxr",
+		"exp":['<div class="title ml15 b mb20 mt20 mainTextColor">([^<]*)<br/>'],
+                "unique":"1",
+                "omittag":['a','/a']
+		},
+                {		
+		"str":"lxstr",
+		"exp":['<li>([^<]*)：([^<]*)</li>',],
+                "unique":"0",
+                "scroll":"1",
+                "omittag":['a','/a','br/']
+		},
+                
+		],
+       "encoding":"GBK",
+       "needLoop":"0",
+       "loopUrl":[],
+       "job_description":"阿里巴巴-佛山"
+	})
+
+
+jobpath.append({
+        "url":["http://china.alibaba.com/company/detail/intro/${qsurl2}.html",],        
+	"regexps":[{		
+		"str":"brief",
+		"exp":["<tr>[^<]*<td[^>]*>[^<]*<div[^>]*>([^<]*)</div>[^<]*</td>[^<]*<td[^>]*>([^<]*)</td>",],
+                "unique":"0",
+                "omittag":['a','/a','br/','p','/p','strong','/strong'],
+                "scroll":"1"
+		},
+                {		
+		"str":"sbrief",
+		"exp":["<tr>[^<]*<td[^>]*>[^<]*<strong>([^<]*)</strong>[^<]*</td>[^<]*<td[^>]*>[^<]*<strong>([^<]*)</strong>[^<]*</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>([^<]*)[^<]*</td>[^<]*<td[^>]*>([^<]*)",],
+                "unique":"0",
+                "omittag":['a','/a','br/','p','/p','div','/div','span','/span'],
+                "scroll":"1"
+		},
+		],
+       "encoding":"GBK",
+       "needLoop":"0",
+       "loopUrl":[],
+       "job_description":"阿里巴巴-佛山"
+	})
+
+jobpath.append({
+    	"url":["http://${qsurl2}.cn.alibaba.com/athena/bizreflist/${qsurl2}.html",],
+	"regexps":[{		
+		"str":"etsecond",
+		"exp":[
+                    #"<table[^>]*>[^<]*<tr>[^<]*<td[^>]*>名&nbsp;&nbsp;&nbsp;&nbsp;称：</td>[^<]*<td[^>]*>[^<]*</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>注&nbsp;册&nbsp;号：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>注册地址：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>法定代表人：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>注册资本：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>企业类型：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>成立日期：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>营业期限：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>经营范围：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>登记机关：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*<tr>[^<]*<td[^>]*>年检时间：</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>[^<]*</table>"
+                    "<tr>[^<]*<td[^>]*>([^<]*)</td>[^<]*<td[^>]*>([^<]*)</td>[^<]*</tr>",],
+                "unique":"0",
+                "scroll":"1"
+		},                
+		],
+       "encoding":"GBK",
+       "needLoop":"0",
+       "loopUrl":[],
+       "callprint":"1",
+       "job_description":"阿里巴巴-佛山"
+	})
+
+
+   
+jobpath.append({"endflag":"1","outputkeys":["brief","sbrief","qsurl3","etsecond","qsurl1","$albb","lxr1","lxstr"]})
+
+定义了六层规则，引擎按照顺序从第一层开始，一步一步进行解析抓取
+例子中的六层分别是：
+1.阿里巴巴网站广东省佛山市公司列表页（第一页）
+这一层定义了两个内容
+	一、 "regexps":[{		
+			"str":"nsurl",
+			"exp":['<a  onmousedown="[^"]*"  href="([^"]*)" [^>]*>下一页</a>',],
+			"unique":"1",
+			}, ],
+		这个正则表达式组定义了一个正则表达式，'<a  onmousedown="[^"]*"  href="([^"]*)" [^>]*>下一页</a>'，结果用"str":"nsurl",命名
+		这个结果会在随后的"needLoop":"1",
+				  "loopUrl":["${nsurl1}",],
+		中使用，needLoop说明这个页面需要循环抓取，下一个抓取页面由前一次抓取到的"${nsurl1}"值决定，这个值就是前面正则表达式匹配的结果
+	二、"getblocks":{"start_str":'<div class="content">\n<div class="info">',"end_str":'<div class="content">\n<div class="info">',"cnt_str":"comblock"},
+	    这个规则提取了页面中从'<div class="content">\n<div class="info">'开始，到'<div class="content">\n<div class="info">'结束的一段html代码
+	    这个代码会在第二层中用到
+
+2.第二层"url":['inline:///${comblock}',],指明解析内容为第一层抓取中抓取到的${comblock}值，
+  第二层定义了正则表达式组：
+  "regexps":[{		
+		"str":"qsurl",
+		"exp":['<span class="m undline"><a href="(http\://([^"]*).cn\.alibaba\.com/)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://china\.alibaba\.com/company/detail/([^"]*).html)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://company\.china\.alibaba\.com/athena/([^"]*).html)"[^>]*>([^<]*)<'],
+                "unique":"0",
+                "omittag":['font','/font']
+		},
+                {		
+		"str":"lxurl",
+		"exp":['<a href="([^"]*)" [^>]*>联系方式</a>',],
+                "unique":"1",          
+		},                
+		],
+  其中{		
+		"str":"qsurl",
+		"exp":['<span class="m undline"><a href="(http\://([^"]*).cn\.alibaba\.com/)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://china\.alibaba\.com/company/detail/([^"]*).html)"[^>]*>([^<]*)',
+                       '<span class="m undline"><a href="(http\://company\.china\.alibaba\.com/athena/([^"]*).html)"[^>]*>([^<]*)<'],
+                "unique":"0",
+                "omittag":['font','/font']
+		},
+  定义了三个正则表达式，这三个正则表达式匹配的结果会顺序保存在一个列表中，每个正则表达式匹配会生成一个3项的tupple,(公司url,公司代号,公司名称),三个值分别对应qsurl1,qsurl2,qsurl3
+  "omittag":['font','/font']表示匹配前过滤掉'font','/font'两个tag
+  "unique":"0",表示抓全部的结果，这个值是1的话，只取第一个结果
+
+  第二个正则表达式组
+  {		
+		"str":"lxurl",
+		"exp":['<a href="([^"]*)" [^>]*>联系方式</a>',],
+                "unique":"1",          
+		},  
+  定义了联系方式指向的url，并作为${lxurl1}来保存，这个值只需取第一个
+
+
+3.第三层起始url为"url":['${lxurl1}',],   
+这个是公司联系方式页，是第二层中 {		
+		"str":"lxurl",
+		"exp":['<a href="([^"]*)" [^>]*>联系方式</a>',],
+                "unique":"1",          
+		},匹配的结果
+
+规则中	"regexps":[{		
+		"str":"lxr",
+		"exp":['<div class="title ml15 b mb20 mt20 mainTextColor">([^<]*)<br/>'],
+                "unique":"1",
+                "omittag":['a','/a']
+		},
+                {		
+		"str":"lxstr",
+		"exp":['<li>([^<]*)：([^<]*)</li>',],
+                "unique":"0",
+                "scroll":"1",
+                "omittag":['a','/a','br/']
+		},                
+		],
+分别定义了联系人，联系方式的抓取
+注意到两个正则表达式分别设置了"unique":"1"和"scroll":"1",
+"scroll":"1",表示将抓取结果用||符号连接起来，生成一个整个的字符串，并用${lxstr}表示,这时不需加上表明位置的数字1
+正则表达式组中的多个正则表达式规则之间使用叉乘，例如：
+正则表达式规则1有3个结果[{'lxurl1':'老李',},{'lxurl1':'老王',},{'lxurl1':'老张',}]
+正则表达式规则2有2个结果[{'lxstr1':'1352343','lxstr2':'12464564564'},{'lxstr1':'213214354','lxstr2':'137324564565'}]
+
+那么正则表达式组结果为[{'lxurl1':'老李',{'lxstr1':'1352343','lxstr2':'12464564564'}},
+			{'lxurl1':'老王',{'lxstr1':'1352343','lxstr2':'12464564564'}},
+			{'lxurl1':'老张',{'lxstr1':'1352343','lxstr2':'12464564564'}},
+			{'lxurl1':'老李',{'lxstr1':'213214354','lxstr2':'137324564565'}},
+			{'lxurl1':'老王',{'lxstr1':'213214354','lxstr2':'137324564565'}},
+			{'lxurl1':'老张',{'lxstr1':'213214354','lxstr2':'137324564565'}}
+			]
+
+
+最后一层
+	{"endflag":"1","outputkeys":["brief","sbrief","qsurl3","etsecond","qsurl1","$albb","lxr1","lxstr"]}
+	表示到这一层就要输出结果了，引擎会根据"outputkeys":["brief","sbrief","qsurl3","etsecond","qsurl1","$albb","lxr1","lxstr"]
+	定义的key到runtimestatus里查找相应的值（例中值即为
+		runtimestatus["brief"],runtimestatus["sbrief"],runtimestatus["qsurl3"],runtimestatus["etsecond"],
+		runtimestatus["qsurl1"],"albb",runtimestatus["lxr1"],runtimestatus["lxstr"]）
+		其中以$开头表示的值会被直接保存，如"$albb"保存为albb
+最后一层将要输出的结果保存在列表中，传递给stdb模块，stdb模块负责后续的数据处理（入库等）
+
+
+
+
+
+1、wg_scan 扫面任务执行明细
+2、wg_job 配置的扫描任务
+3、wg_corp 
+
+
+
+callprint=1 终止抓取
+regexps 解析页面规则
+getblocks：定义目标页面需要解析的代码块
+omittag:匹配前过滤掉相关的标签
+
+
+

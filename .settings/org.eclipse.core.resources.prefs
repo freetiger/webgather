@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/gather/configure.py=utf-8
+encoding//src/gather/genjobsetting.py=utf-8
+encoding//src/gather/grabber.py=utf-8
+encoding//src/gather/stdb.py=utf-8
+encoding//src/gather/wg_batchshell.py=utf-8
+encoding//src/gather/wg_jshell.py=utf-8
+encoding//src/web/configure.py=utf-8
+encoding//src/web/jobsetting_manager.py=utf-8
+encoding//src/web/jsdb.py=utf-8
+encoding/<project>=UTF-8

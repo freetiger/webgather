@@ -1,0 +1,14 @@
+双击jobsetting_manager.pyc文件启动引擎，之后开始抓取。
+
+
+任务设置的页面地址：
+	本机ip:8000/list
+	（http://10.227.166.106:8000/list）
+
+
+
+
+运行python wg_jshell.pyc --jobid=任务序号 --keyword=关键字
+or
+运行python wg_jshell.py --jobid=任务序号 --keyword=关键字
+多个关键字用+隔开

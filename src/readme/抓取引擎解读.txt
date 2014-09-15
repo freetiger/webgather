@@ -1,0 +1,16 @@
+1、wg_jshell.py是抓取引擎的起点。解析启动引擎时输入的参数（如jobid）并开始扫描。
+	the_grabber = Grabber()
+    the_grabber.startscan(job_id,keyword)
+2、wg_batchshell.py是抓取引擎的成批抓取起点。解析启动引擎时输入的参数（如batchid）并开始扫描。
+3、webgrabber.py是linux系统下简易的抓取引擎启动脚本。启动了wg_jshell.py并输出日志。
+4、jobsetting_manager.py启动设置抓取任务的web服务。启动twisted程序，加载了对客户端具体请求的响应，等待客户端请求。
+5、jsdb.py是设置抓取任务web服务的数据库访问sql文件。在jobsetting_manager.py有调用。
+6、jspage.html存储了设置抓取任务页面的主要源码，这些源码在jobsetting_manager.py组合成最终响应客户端请求的页面源码。
+------------------------------db文件夹下的文件-----------------------------
+7、configure.py为配置文件，数据库连接、抓取线程数等在这里设置。
+8、genjobsetting.py是设置抓取规则文件，在该文件创建了抓取规则对象，并用pickle将该规则对象序列化，之后输出到磁盘文件output.txt中。
+	//序列化后的对象可以通过反序列化还原。序列化后的规则对象存于数据库库中，保证每次抓取使用的规则对象相同。规则对象存入数据库后，
+	//genjobsetting.py可以被修改用于生成新的规则对象。
+9、grabber.py是主要的抓取引擎文件。在grabber.py中根据抓取规则对象到目标网站进行数据抓取，并将抓取的数据输出到磁盘文件中。
+10、stdb.py功能待确定。
+The End！
