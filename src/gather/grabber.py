@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import urllib,urllib2,cookielib
-import re,datetime
-import stdb
-import pickle
+from queue import Queue
+import re
 import threading
-from Queue import Queue
-import configure
+import urllib.request, urllib.error, http.cookiejar
+
+from . import configure
+from . import stdb
+
 
 default_jobsetting = {"html_encoding":"GBK","parse_encoding":"utf-8"}
 jobpath = []
@@ -17,7 +18,7 @@ output_path = "test.txt"
 wdg = {}
 
 
-class HTTPRefererProcessor(urllib2.BaseHandler):
+class HTTPRefererProcessor(urllib.request.BaseHandler):
     def __init__(self):
         self.referer = None
     
@@ -36,9 +37,9 @@ class HTTPRefererProcessor(urllib2.BaseHandler):
 
     
 
-class ErrorHandler(urllib2.HTTPDefaultErrorHandler):  
+class ErrorHandler(urllib.request.HTTPDefaultErrorHandler):  
     def http_error_default(self, req, fp, code, msg, headers):  
-        result = urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)  
+        result = urllib.error.HTTPError(req.get_full_url(), code, msg, headers, fp)  
         result.status = code  
         return result
     
@@ -63,12 +64,12 @@ def masktoblank(instr):
 
 #inUrl前缀做判断：如果是文件则读取文件内容返回，如果是文本内容则直接返回该内容，如果是url则返回该url应答页面的内容
 def getUrlContent(inUrl,postdata=None):
-    cj = cookielib.CookieJar()
-    opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(cj),
+    cj = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(cj),
             HTTPRefererProcessor(),
         )
-    urllib2.install_opener(opener)
+    urllib.request.install_opener(opener)
         
     if len(inUrl)==0:
      #   print "get blank url"
@@ -80,7 +81,7 @@ def getUrlContent(inUrl,postdata=None):
         tmp_file = open(inUrl[8:],"r")
         filesrc = tmp_file.read()
         tmp_file.close()
-        print "request: "+str(inUrl)
+        print("request: "+str(inUrl))
         #print "done getUrlContent"
         return filesrc
     elif inUrl.startswith("inline:///"):
@@ -98,11 +99,11 @@ def getUrlContent(inUrl,postdata=None):
         "Cookie":"skin=noskin; path=/; domain=.amazon.com; expires=Wed, 25-Mar-2009 08:38:55 GMT\r\nsession-id-time=1238569200l; path=/; domain=.amazon.com; expires=Wed Apr 01 07:00:00 2009 GMT\r\nsession-id=175-6181358-2561013; path=/; domain=.amazon.com; expires=Wed Apr 01 07:00:00 2009 GMT"
     }
 
-    req=urllib2.Request(inUrl,headers=headers) #伪造request的header头，有些网站不支持，会拒绝请求;有些网站必须伪造header头才能访问
+    req=urllib.request.Request(inUrl,headers=headers) #伪造request的header头，有些网站不支持，会拒绝请求;有些网站必须伪造header头才能访问
     htmlsrc = ""
     while len(htmlsrc)==0 and tpnum>0:
         try:
-            print "request: "+str(inUrl)
+            print("request: "+str(inUrl))
             #page = mgr.open(req)
             import socket
             s=socket.socket()
@@ -112,15 +113,15 @@ def getUrlContent(inUrl,postdata=None):
                 resp = None
                 if postdata is not None:
                     #url_data = urllib.urlencode(postdata)
-                    resp = urllib2.urlopen(req)   #inUrl
+                    resp = urllib.request.urlopen(req)   #inUrl
                 else:
-                    print inUrl
-                    resp = urllib2.urlopen(req)
+                    print(inUrl)
+                    resp = urllib.request.urlopen(req)
 
                 htmlsrc =resp.read()                
                 tpnum = 0
             except:
-                print "request time out",tpnum
+                print("request time out",tpnum)
                 htmlsrc = ""
                 tpnum = tpnum - 1
                 
@@ -130,9 +131,9 @@ def getUrlContent(inUrl,postdata=None):
             #print "request done"
           
                 
-        except urllib2.URLError,err:
-            print "error getUrlContent"
-            print err
+        except urllib.error.URLError as err:
+            print("error getUrlContent")
+            print(err)
             return None
       
         #print "done getUrlContent"
@@ -169,7 +170,7 @@ def regpagedata(raw_url,parse_stepset,runtime_status,postdata=None):
     params = param_retrieve_str.findall(raw_url)    
     for items in params:
         if items not in runtime_status:
-            print "can't find "+items+" in runtime status when reg page data. "
+            print("can't find "+items+" in runtime status when reg page data. ")
             return []
         raw_url = raw_url.replace('${'+items+'}',runtime_status[items])
     #print str(runtime_status)
@@ -218,7 +219,7 @@ def regpagedata(raw_url,parse_stepset,runtime_status,postdata=None):
                 b_pos = tmp_src.find(bstr,e_pos)
             else: #未找到结束块e_pos为负值，跳出while循环
                 b_pos = e_pos
-        print  prex,block_num
+        print(prex,block_num)
         if len(rtv) == 0:
             rtv =[{}]
         
@@ -272,10 +273,10 @@ def regpagedata(raw_url,parse_stepset,runtime_status,postdata=None):
                 for items in rtv:
                     tmp_map = {}
                 
-                    for tmp_iks1 in grub_status.keys():
+                    for tmp_iks1 in list(grub_status.keys()):
                         tmp_map[tmp_iks1] = grub_status[tmp_iks1]
                         
-                    for tmp_iks1 in items.keys():
+                    for tmp_iks1 in list(items.keys()):
                         tmp_map[tmp_iks1] = items[tmp_iks1]                        
                              
                     tmp_addon_list.append(tmp_map)      
@@ -314,7 +315,7 @@ def urlinsocket(in_url,runtime_status):
     params = param_retrieve_str.findall(in_url)
     for items in params:
         if items not in runtime_status:
-            print "can't find "+items+" in runtime status when urlinsocket"
+            print("can't find "+items+" in runtime status when urlinsocket")
             return ""
         in_url = in_url.replace('${'+items+'}',str(runtime_status[items]))
         
@@ -347,20 +348,20 @@ class GWorker(threading.Thread):
 
     def run(self):
 
-        print self.getName(),'Started'
+        print(self.getName(),'Started')
         
         while True:            
             items = self.sharedata.get()
             self.parsePage(items[0],items[1])
             self.sharedata.task_done()           
         
-        print self.getName(),'Finished'
+        print(self.getName(),'Finished')
 
     #根据输出列表outputkeys的规则将抓取结果runtime_status（一条结果，即一行结果）整理后存入output_queue
     def outputvalues(self,outputkeys,runtime_status):
     
         output_v = []
-        print "call output"
+        print("call output")
         for kys in outputkeys:
             if kys in runtime_status:
                 output_v.append(masktoblank(runtime_status[kys]))
@@ -382,7 +383,7 @@ class GWorker(threading.Thread):
     #根据所写的正则表达式执行抓取，并将结果存入output_queue
     def parsePage(self,parse_step,runtime_status):
     
-        print "call" + str(parse_step)
+        print("call" + str(parse_step))
         next_status = {}
         if parse_step>= len(self.jobpath):
             return
@@ -408,7 +409,7 @@ class GWorker(threading.Thread):
             raw_url = urlinsocket(p_u,runtime_status)
             if raw_url == None or raw_url == "":
                 if "callprint" in self.jobpath[parse_step] and self.jobpath[parse_step]["callprint"]=="1":
-                    print "halt then call print "
+                    print("halt then call print ")
                     self.sharedata.put((len(self.jobpath)-1,runtime_status))
                 return
             
@@ -417,11 +418,11 @@ class GWorker(threading.Thread):
             else:
                 status_list = regpagedata(raw_url,self.jobpath[parse_step],runtime_status,None)
 
-            print "return list : "+str(len(status_list))
+            print("return list : "+str(len(status_list)))
             
             if len(status_list) ==0 or ( len(status_list) == 1 and len(status_list[0]) == 0 ):
                 if "callprint" in self.jobpath[parse_step] and self.jobpath[parse_step]["callprint"]=="1":
-                    print "halt then call print "
+                    print("halt then call print ")
                     self.sharedata.put((len(self.jobpath)-1,runtime_status))
                 return
             
@@ -441,7 +442,7 @@ class GWorker(threading.Thread):
                     #parsePage(parse_step+1,self.jobpath,next_status)
                     self.sharedata.put((parse_step+1 ,next_status))
                 else:
-                    print "status error "+str(tmp_status)
+                    print("status error "+str(tmp_status))
             #start page loop
 
                 
@@ -465,17 +466,17 @@ class GWorker(threading.Thread):
                         maxnum = next_status[maxnum[2:-1]]
                     else:
                         maxnum = 0
-                    print loopset,maxnum
+                    print(loopset,maxnum)
                     maxnum = int(maxnum)
                     if offset_str not in next_status:
                         next_status[offset_str] = '1'
                     next_status[offset_str] = str(loopset["numperpage"] + int(next_status[offset_str]))
                     offset = next_status[offset_str]
                     runtime_status[offset_str] = offset
-                    print int(next_status[offset_str]), maxnum
+                    print(int(next_status[offset_str]), maxnum)
                     if int(next_status[offset_str]) > maxnum:
-                        print int(next_status[offset_str]), maxnum
-                        print int(next_status[offset_str]) > maxnum
+                        print(int(next_status[offset_str]), maxnum)
+                        print(int(next_status[offset_str]) > maxnum)
                         hasNext = False
                         break
                    
@@ -514,7 +515,7 @@ class DBWorker(threading.Thread):
 
     def run(self):
 
-        print self.getName(),'Started'        
+        print(self.getName(),'Started')        
             
         while True:
             
@@ -547,12 +548,12 @@ class Grabber(object):
         self.dbpt.prepareScan(job_id)        
         org_setting = None
         if keyword is not None:
-            print keyword
+            print(keyword)
             org_setting = self.dbpt.jobsetting[0]['url'][0]
             org_setting = org_setting.replace("${kw}",keyword)            
 
         else:
-            print "No keyword"
+            print("No keyword")
             org_setting = self.dbpt.jobsetting[0]['url'][0]
             org_setting = org_setting.replace("${kw}","")
             
@@ -582,7 +583,7 @@ class Grabber(object):
         
         #self.dbpt.closeConnection()
         self.dbpt.finishscan()
-        print "finish"
+        print("finish")
         
         return
     
@@ -593,7 +594,7 @@ if __name__ == "__main__":
     #test_grabber = Grabber()
     #test_grabber.startscan(66)
 
-    print "just import it"
+    print("just import it")
     getUrlContent('http://sr.ju690.cn?orderby=new&dismode=discuss&day=7&p=page2')
 
     

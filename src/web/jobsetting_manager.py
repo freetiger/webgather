@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+
+import twisted
 from twisted.web import resource, static, server
-import jsdb
+from . import jsdb
 
 class UpdateJob(resource.Resource):
     
@@ -16,7 +18,7 @@ class UpdateJob(resource.Resource):
                     'searchword':'',
                     'getrule':''                   
                 }
-        for key, values in request.args.items( ):
+        for key, values in list(request.args.items( )):
             jobmap[key] = values[0]
 
         jsdb.updatejob((jobmap['jobid'],jobmap['jobname'],'',jobmap['getrule'],jobmap['searchword'],jobmap['searchbase']))        
@@ -36,7 +38,7 @@ class AddJob(resource.Resource):
                     'searchword':'',
                     'getrule':''                   
                 }
-        for key, values in request.args.items( ):
+        for key, values in list(request.args.items( )):
             jobmap[key] = values[0]
 
         jsdb.addjob((jobmap['jobname'],0,jobmap['getrule'],jobmap['searchword'],jobmap['searchbase']))        
@@ -52,7 +54,7 @@ class DelJob(resource.Resource):
     def render(self, request):
 
         jobmap = {  'jobid':-1,}
-        for key, values in request.args.items( ):
+        for key, values in list(request.args.items( )):
             jobmap[key] = values[0]
 
         jsdb.deletejob(int(jobmap['jobid']))        
@@ -68,7 +70,7 @@ class RunJob(resource.Resource):
     def render(self, request):
         
         jobmap = {  'jobid':-1,'searchword':'','searchbase':''}
-        for key, values in request.args.items( ):
+        for key, values in list(request.args.items( )):
             jobmap[key] = values[0]
 
         import os
@@ -77,7 +79,7 @@ class RunJob(resource.Resource):
         
         for items in jobmap['searchword'].split(","):
             os.system("start python wg_jshell.py --jobid=%s > scaningjob%s.log &" % (str(jobmap['jobid']),str(jobmap['jobid']))   )
-            print "start python wg_jshell.py --jobid=%s > scaningjob%s.log &" % (str(jobmap['jobid']),str(jobmap['jobid']))
+            print("start python wg_jshell.py --jobid=%s > scaningjob%s.log &" % (str(jobmap['jobid']),str(jobmap['jobid'])))
                 
         return ListJob(-1).render(request)
 
@@ -93,7 +95,7 @@ class ListJob(resource.Resource):
 
         
         jobitem = None
-        for key, values in request.args.items( ):
+        for key, values in list(request.args.items( )):
 
             if key=="jobid" and len(values)>0:                
                 try:

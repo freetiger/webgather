@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
 import getopt
-import os.path
-import MySQLdb
-import configure
-import datetime
-from grabber import Grabber
+import os
+import sys
+
+from mysql import connector
+
+from . import configure
+from .grabber import Grabber
+
 
 help_text="""Usage: python wg_batchshell.py [options]
 
@@ -19,11 +20,16 @@ Examples:
   wg_batchshell.py --joblist=1,4,6     scan the job with the id 1,4,6
 """
 def print_help():
-    print >>sys.stderr, help_text
+    print(help_text, file=sys.stderr)
     sys.exit(1)
 
 def getConnect():
-    return MySQLdb.connect(host=configure.db_mysql_host,port=configure.db_mysql_port,db=configure.db_mysql_db,user=configure.db_mysql_user,passwd=configure.db_mysql_passwd)
+    host = configure.db_mysql_host
+    port = configure.db_mysql_port
+    database = configure.db_mysql_db
+    user = configure.db_mysql_user
+    password = configure.db_mysql_passwd
+    return connector.connect(host=host, port=port, database=database,user=user,password=password)
 
 def main(args):
    
@@ -40,9 +46,9 @@ def main(args):
             try:
                 batch_id=int(arg)
             except:
-                print_error("batchid must be integer.")
+                print("batchid must be integer.", file=sys.stderr)
             if batch_id<0:
-                print_error("batchid must be larger than zero.")
+                print("batchid must be larger than zero.", file=sys.stderr)
     
     conn = getConnect()
     cur=conn.cursor()

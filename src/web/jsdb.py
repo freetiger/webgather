@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-import configure
-import MySQLdb
-import datetime
-import pickle
-import os
+
+from mysql import connector
+
+from . import configure
+
 
 def getConnect():
-    return MySQLdb.connect(host=configure.db_mysql_host,port=configure.db_mysql_port,db=configure.db_mysql_db,user=configure.db_mysql_user,passwd=configure.db_mysql_passwd)
+    host = configure.db_mysql_host
+    port = configure.db_mysql_port
+    database = configure.db_mysql_db
+    user = configure.db_mysql_user
+    password = configure.db_mysql_passwd
+    return connector.connect(host=host, port=port, database=database,user=user,password=password)
 
 def readjobs():
     conn = getConnect()

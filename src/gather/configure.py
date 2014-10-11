@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from email.header import UTF8
 
 #db mysql
 db_mysql_host='localhost'
